@@ -76,3 +76,42 @@ cat ~/airflow/.env
 `docker-compose up airflow-init`
 
 Дожидаемся окончания выполнения предыдущей команды и поднимаем все сервисы:
+`docker-compose up airflow-webserver airflow-scheduler -d
+
+**Дополнение в случае добавления nginx:
+
+Дополняем сервисом nginx файл docker-compose.yml.
+
+Создаем, заполняем и копируем файл nginx.conf в каталог ~/nginx/. Содержимое д.б. примерно такое:
+```
+server {
+    listen 80;
+
+    # Перенаправление запросов с /airflow на airflow-webserver
+    location /airflow/ {
+        proxy_pass http://airflow-webserver:8080/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+
+        # Убедитесь, что путь корректно передается
+        proxy_redirect off;
+    }
+}
+```
+
+Узнаем публичный IP-адрес нашего сервера:
+```
+curl -s ifconfig.me
+```
+
+Добавляем либо в переменные окружения, либо в файл .env следующую переменную:
+```
+AIRFLOW_BASE_URL=http://<публичный IP-адрес сервера>/airflow
+```
+
+Например, так:
+```
+echo "AIRFLOW_BASE_URL=http://<публичный IP-адрес сервера>/airflow" >> .env
+```
