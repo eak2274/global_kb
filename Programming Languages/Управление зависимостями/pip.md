@@ -11,3 +11,8 @@ Windows
 pip list | findstr apache-airflow-providers-docker
 ```
 
+Обновить pip до последней версии:
+
+```
+pip install --upgrade pip
+```
